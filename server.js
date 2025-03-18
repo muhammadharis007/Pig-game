@@ -1,17 +1,25 @@
-const WebSocket = require('ws');
+const express = require('express');
+const path = require('path');
+const { WebSocketServer } = require('ws');
+
+const app = express();
 const PORT = process.env.PORT || 8080;
 
-const server = new WebSocket.Server({
-  port: PORT,
-  perMessageDeflate: false,
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Create HTTP server
+const server = app.listen(PORT, () => {
+  console.log(`HTTP Server running on port ${PORT}`);
 });
 
-console.log(`Server started on port ${PORT}`);
+// Create WebSocket server
+const wss = new WebSocketServer({ server });
 
 let waitingPlayer = null;
 let games = new Map();
 
-server.on('connection', ws => {
+wss.on('connection', ws => {
   console.log('New player connected');
 
   if (waitingPlayer === null) {
